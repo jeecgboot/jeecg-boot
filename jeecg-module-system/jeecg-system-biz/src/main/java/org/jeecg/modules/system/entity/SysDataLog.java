@@ -3,6 +3,7 @@ package org.jeecg.modules.system.entity;
 import java.io.Serializable;
 import java.util.Date;
 
+import com.baomidou.mybatisplus.annotation.TableName;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import com.baomidou.mybatisplus.annotation.IdType;
@@ -20,6 +21,7 @@ import lombok.experimental.Accessors;
 @Data
 @EqualsAndHashCode(callSuper = false)
 @Accessors(chain = true)
+@TableName("sys_data_log")
 public class SysDataLog implements Serializable {
 	private static final long serialVersionUID = 1L;
 	
