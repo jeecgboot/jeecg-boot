@@ -79,6 +79,7 @@ public enum RangeDateEnum {
             //本周
             calendar1.set(Calendar.DAY_OF_WEEK, 2);
 
+            calendar2.set(Calendar.DAY_OF_WEEK,2);
             calendar2.add(Calendar.WEEK_OF_MONTH,1);
             calendar2.add(Calendar.DAY_OF_WEEK,-1);
         } else if(SZ.key.equals(key)){
