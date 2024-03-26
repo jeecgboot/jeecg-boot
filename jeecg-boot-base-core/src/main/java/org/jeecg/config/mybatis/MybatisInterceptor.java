@@ -66,7 +66,11 @@ public class MybatisInterceptor implements Interceptor {
 						field.setAccessible(false);
 						if (localCreateDate == null || "".equals(localCreateDate)) {
 							field.setAccessible(true);
-							field.set(parameter, new Date());
+							if (Date.class.equals(field.getType())) {
+								field.set(parameter, new Date());
+							} else if (LocalDateTime.class.equals(field.getType())) {
+								field.set(parameter, LocalDateTime.now());
+							}
 							field.setAccessible(false);
 						}
 					}
@@ -142,9 +146,14 @@ public class MybatisInterceptor implements Interceptor {
 							field.setAccessible(false);
 						}
 					}
+					//更新时间
 					if ("updateTime".equals(field.getName())) {
 						field.setAccessible(true);
-						field.set(parameter, new Date());
+						if (Date.class.equals(field.getType())) {
+							field.set(parameter, new Date());
+						} else if (LocalDateTime.class.equals(field.getType())) {
+							field.set(parameter, LocalDateTime.now());
+						}
 						field.setAccessible(false);
 					}
 				} catch (Exception e) {
