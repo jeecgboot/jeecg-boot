@@ -344,10 +344,10 @@ public class SysDepartController {
      */
     @RequestMapping(value = "/exportXls")
     public ModelAndView exportXls(SysDepart sysDepart,HttpServletRequest request) {
-		//------------------------------------------------------------------------------------------------
-		//是否开启系统管理模块的多租户数据隔离【SAAS多租户模式】
 		if(MybatisPlusSaasConfig.OPEN_SYSTEM_TENANT_CONTROL){
 			sysDepart.setTenantId(oConvertUtils.getInt(TenantContext.getTenant(), 0));
+		} else {
+			sysDepart.setTenantId(0); //added by yardstown for issue#5972, to init no multitenant as 0
 		}
 		//------------------------------------------------------------------------------------------------
 		
