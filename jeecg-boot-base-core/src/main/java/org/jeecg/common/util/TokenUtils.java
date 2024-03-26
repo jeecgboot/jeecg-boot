@@ -135,6 +135,8 @@ public class TokenUtils {
                 // 设置Toekn缓存有效时间
                 redisUtil.set(CommonConstant.PREFIX_USER_TOKEN + token, newAuthorization);
                 redisUtil.expire(CommonConstant.PREFIX_USER_TOKEN + token, JwtUtil.EXPIRE_TIME * 2 / 1000);
+                // 刷新登录的token和租户id的绑定过期时间
+                redisUtil.expire(CommonConstant.PREFIX_USER_TENANT+token,JwtUtil.EXPIRE_TIME * 2 / 1000);
             }
             return true;
         }

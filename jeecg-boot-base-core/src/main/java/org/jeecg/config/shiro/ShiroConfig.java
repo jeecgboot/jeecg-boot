@@ -12,6 +12,7 @@ import org.apache.shiro.spring.web.ShiroFilterFactoryBean;
 import org.apache.shiro.web.mgt.DefaultWebSecurityManager;
 import org.crazycake.shiro.*;
 import org.jeecg.common.constant.CommonConstant;
+import org.jeecg.common.util.RedisUtil;
 import org.jeecg.common.util.oConvertUtils;
 import org.jeecg.config.JeecgBaseConfig;
 import org.jeecg.config.shiro.filters.CustomShiroFilterFactoryBean;
@@ -56,6 +57,8 @@ public class ShiroConfig {
     private LettuceConnectionFactory lettuceConnectionFactory;
     @Autowired
     private Environment env;
+    @Autowired
+    private RedisUtil redisUtil;
     @Resource
     private JeecgBaseConfig jeecgBaseConfig;
     @Autowired(required = false)
@@ -189,7 +192,7 @@ public class ShiroConfig {
         Map<String, Filter> filterMap = new HashMap<String, Filter>(1);
         //如果cloudServer为空 则说明是单体 需要加载跨域配置【微服务跨域切换】
         Object cloudServer = env.getProperty(CommonConstant.CLOUD_SERVER_KEY);
-        filterMap.put("jwt", new JwtFilter(cloudServer==null));
+        filterMap.put("jwt", new JwtFilter(cloudServer==null,redisUtil));
         shiroFilterFactoryBean.setFilters(filterMap);
         // <!-- 过滤链定义，从上向下顺序执行，一般将/**放在最为下边
         filterChainDefinitionMap.put("/**", "jwt");

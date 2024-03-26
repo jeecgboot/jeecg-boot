@@ -11,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.annotation.RequiresRoles;
 import org.jeecg.common.api.vo.Result;
+import org.jeecg.common.config.TenantContext;
 import org.jeecg.common.constant.CacheConstant;
 import org.jeecg.common.constant.CommonConstant;
 import org.jeecg.common.constant.SymbolConstant;
@@ -454,6 +455,9 @@ public class LoginController {
 			return loginTenantError;
 		}
 
+		// 设置登录的token和租户id进行绑定
+		redisUtil.set(CommonConstant.PREFIX_USER_TENANT+token, TenantContext.getTenant(),JwtUtil.EXPIRE_TIME * 2 / 1000);
+
 		//3.设置登录用户信息
 		obj.put("userInfo", sysUser);
 		
@@ -618,6 +622,9 @@ public class LoginController {
 		// 设置超时时间
 		redisUtil.set(CommonConstant.PREFIX_USER_TOKEN + token, token);
 		redisUtil.expire(CommonConstant.PREFIX_USER_TOKEN + token, JwtUtil.EXPIRE_TIME*2 / 1000);
+
+		// 登录的token和租户id的绑定
+		redisUtil.set(CommonConstant.PREFIX_USER_TENANT+token,TenantContext.getTenant(),JwtUtil.EXPIRE_TIME * 2 / 1000);
 
 		//token 信息
 		obj.put("token", token);

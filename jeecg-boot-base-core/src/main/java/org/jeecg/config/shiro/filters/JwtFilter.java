@@ -6,6 +6,7 @@ import org.apache.shiro.web.filter.authc.BasicHttpAuthenticationFilter;
 import org.jeecg.common.config.TenantContext;
 import org.jeecg.common.constant.CommonConstant;
 import org.jeecg.common.system.util.JwtUtil;
+import org.jeecg.common.util.RedisUtil;
 import org.jeecg.common.util.oConvertUtils;
 import org.jeecg.config.shiro.JwtToken;
 import org.springframework.http.HttpHeaders;
@@ -31,9 +32,16 @@ public class JwtFilter extends BasicHttpAuthenticationFilter {
      */
     private boolean allowOrigin = true;
 
+    private RedisUtil redisUtil;
+
     public JwtFilter(){}
     public JwtFilter(boolean allowOrigin){
         this.allowOrigin = allowOrigin;
+    }
+
+    public JwtFilter(boolean allowOrigin,RedisUtil redisUtil){
+        this.allowOrigin = allowOrigin;
+        this.redisUtil = redisUtil;
     }
 
     /**
@@ -72,6 +80,11 @@ public class JwtFilter extends BasicHttpAuthenticationFilter {
         JwtToken jwtToken = new JwtToken(token);
         // 提交给realm进行登入，如果错误他会抛出异常并被捕获
         getSubject(request, response).login(jwtToken);
+        // 本地线程写入登录租户id
+        Object tenantId = redisUtil.get(CommonConstant.PREFIX_USER_TENANT + token);
+        if (tenantId!=null) {
+            TenantContext.setTenant(String.valueOf(tenantId));
+        }
         // 如果没有抛出异常则代表登入成功，返回true
         return true;
     }

@@ -211,6 +211,8 @@ public class EmailSendMsgHandle implements ISendMsgHandle {
         redisUtil.set(CommonConstant.PREFIX_USER_TOKEN + token, token);
         // 设置超时时间 1个小时
         redisUtil.expire(CommonConstant.PREFIX_USER_TOKEN + token, JwtUtil.EXPIRE_TIME * 1 / 1000);
+        // 刷新登录的token和租户id的绑定过期时间
+        redisUtil.expire(CommonConstant.PREFIX_USER_TENANT+token,JwtUtil.EXPIRE_TIME * 1 / 1000);
         return token;
     }
 }

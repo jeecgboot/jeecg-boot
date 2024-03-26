@@ -83,6 +83,7 @@ public interface CommonConstant {
     String PREFIX_USER_TOKEN  = "prefix_user_token:";
 //    /** Token缓存时间：3600秒即一小时 */
 //    int  TOKEN_EXPIRE_TIME  = 3600;
+    String PREFIX_USER_TENANT  = "prefix_user_tenat:";
 
     /** 登录二维码 */
     String  LOGIN_QRCODE_PRE  = "QRCODELOGIN:";
