@@ -58,7 +58,7 @@ public class DictAspect {
 
     @Around("excudeService()")
     public Object doAround(ProceedingJoinPoint pjp) throws Throwable {
-    	long time1=System.currentTimeMillis();	
+    	long time1=System.currentTimeMillis();
         Object result = pjp.proceed();
         long time2=System.currentTimeMillis();
         log.debug("获取JSON数据 耗时："+(time2-time1)+"ms");
@@ -93,7 +93,7 @@ public class DictAspect {
      */
     private Object parseDictText(Object result) {
         if (result instanceof Result) {
-            if (((Result) result).getResult() instanceof IPage) {
+            if (((Result) result).getResult() instanceof IPage || ((Result) result).getResult() instanceof List) {
                 List<JSONObject> items = new ArrayList<>();
 
                 //step.1 筛选出加了 Dict 注解的字段列表
@@ -101,7 +101,14 @@ public class DictAspect {
                 // 字典数据列表， key = 字典code，value=数据列表
                 Map<String, List<String>> dataListMap = new HashMap<>(5);
                 //取出结果集
-                List<Object> records=((IPage) ((Result) result).getResult()).getRecords();
+                List<Object> records=  null;
+
+                if (((Result) result).getResult() instanceof List) {
+                    records=    (List<Object>) ((Result) result).getResult();
+                } else {
+                    records=  ((IPage) ((Result) result).getResult()).getRecords();
+                }
+
                 //update-begin--Author:zyf -- Date:20220606 ----for：【VUEN-1230】 判断是否含有字典注解,没有注解返回-----
                 Boolean hasDict= checkHasDict(records);
                 if(!hasDict){
@@ -206,7 +213,14 @@ public class DictAspect {
                     }
                 }
 
-                ((IPage) ((Result) result).getResult()).setRecords(items);
+
+                //List 处理
+                if (((Result) result).getResult() instanceof List) {
+                    ((Result) result).setResult(items);
+                } else {
+                    ((IPage) ((Result) result).getResult()).setRecords(items);
+                }
+
             }
 
         }
@@ -293,13 +307,13 @@ public class DictAspect {
                 log.debug("translateDictFromTableByKeys.dictCode:" + dictCode);
                 log.debug("translateDictFromTableByKeys.values:" + values);
                 //update-begin---author:chenrui ---date:20231221  for：[issues/#5643]解决分布式下表字典跨库无法查询问题------------
-                
+
                 //update-begin---author:wangshuai---date:2024-01-09---for:微服务下为空报错没有参数需要传递空字符串---
                 if(null == dataSource){
                     dataSource = "";
                 }
                 //update-end---author:wangshuai---date:2024-01-09---for:微服务下为空报错没有参数需要传递空字符串---
-                
+
                 List<DictModel> texts = commonApi.translateDictFromTableByKeys(table, text, code, values, dataSource);
                 //update-end---author:chenrui ---date:20231221  for：[issues/#5643]解决分布式下表字典跨库无法查询问题------------
                 log.debug("translateDictFromTableByKeys.result:" + texts);
@@ -386,9 +400,9 @@ public class DictAspect {
      */
     @Deprecated
     private String translateDictValue(String code, String text, String table, String key) {
-    	if(oConvertUtils.isEmpty(key)) {
-    		return null;
-    	}
+        if(oConvertUtils.isEmpty(key)) {
+            return null;
+        }
         StringBuffer textValue=new StringBuffer();
         String[] keys = key.split(",");
         for (String k : keys) {
@@ -401,7 +415,7 @@ public class DictAspect {
             if (!StringUtils.isEmpty(table)){
                 log.debug("--DictAspect------dicTable="+ table+" ,dicText= "+text+" ,dicCode="+code);
                 String keyString = String.format("sys:cache:dictTable::SimpleKey [%s,%s,%s,%s]",table,text,code,k.trim());
-                    if (redisTemplate.hasKey(keyString)){
+                if (redisTemplate.hasKey(keyString)){
                     try {
                         tmpValue = oConvertUtils.getString(redisTemplate.opsForValue().get(keyString));
                     } catch (Exception e) {
@@ -416,7 +430,7 @@ public class DictAspect {
                     try {
                         tmpValue = oConvertUtils.getString(redisTemplate.opsForValue().get(keyString));
                     } catch (Exception e) {
-                       log.warn(e.getMessage());
+                        log.warn(e.getMessage());
                     }
                 }else {
                     tmpValue = commonApi.translateDict(code, k.trim());
